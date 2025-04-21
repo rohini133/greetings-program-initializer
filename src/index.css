@@ -13,11 +13,11 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 4 90% 48%; /* D-Mart Red */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 79% 46%; /* D-Mart Blue */
+    --secondary-foreground: 210 40% 98%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
@@ -33,22 +33,6 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
@@ -61,10 +45,10 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 4 90% 48%; /* D-Mart Red */
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 210 79% 46%; /* D-Mart Blue */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
@@ -79,14 +63,6 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -97,5 +73,315 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .inventory-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+}
+
+.product-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.status-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-in-stock {
+  background-color: #10b981;
+  color: white;
+}
+
+.status-low-stock {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.status-out-of-stock {
+  background-color: #ef4444;
+  color: white;
+}
+
+/* New animations and effects */
+.btn-hover-scale {
+  transition: transform 0.2s;
+}
+
+.btn-hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.card-hover-shadow {
+  transition: box-shadow 0.3s ease;
+}
+
+.card-hover-shadow:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.role-badge-admin {
+  background-color: rgba(37, 99, 235, 0.1);
+  color: rgba(37, 99, 235, 1);
+}
+
+.role-badge-cashier {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: rgba(16, 185, 129, 1);
+}
+
+/* D-Mart specific styles */
+.dmart-gradient {
+  background: linear-gradient(135deg, #e11b22 0%, #c61017 100%);
+}
+
+.dmart-blue-gradient {
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+}
+
+.dmart-card {
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.dmart-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dmart-sale-banner {
+  background: linear-gradient(to right, #e11b22, #f43f5e);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dmart-offer-tag {
+  background-color: #e11b22;
+  color: white;
+  font-weight: bold;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.dmart-button {
+  background-color: #e11b22;
+  color: white;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.dmart-button:hover {
+  background-color: #c61017;
+}
+
+.dmart-blue-button {
+  background-color: #1e40af;
+  color: white;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.dmart-blue-button:hover {
+  background-color: #1e3a8a;
+}
+
+/* Login page specific styles */
+.login-container {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.login-sidebar {
+  background: linear-gradient(135deg, #e11b22 0%, #c61017 100%);
+  color: white;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.login-form {
+  background-color: white;
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.animated-input {
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.animated-input:focus {
+  border-color: #e11b22;
+  box-shadow: 0 0 0 3px rgba(225, 27, 34, 0.2);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -80vw 0;
+  }
+  100% {
+    background-position: 80vw 0;
+  }
+}
+
+.shine-effect {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background-size: 80vw 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* E-commerce specific styles */
+.e-commerce-gradient {
+  background: linear-gradient(135deg, #e11b22 0%, #c61017 100%);
+}
+
+.marketplace-card {
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.marketplace-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.promo-banner {
+  background: linear-gradient(to right, #e11b22, #f43f5e);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.deal-tag {
+  background-color: #e11b22;
+  color: white;
+  font-weight: bold;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .section-padding {
+    padding: 2rem 1rem;
+  }
+  
+  .card-content {
+    padding: 1rem;
+  }
+  
+  h1, h2, h3 {
+    word-break: break-word;
+  }
+  
+  .dialog-content {
+    width: 95%;
+    max-width: 95%;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Make dialogs work better on mobile */
+@media (max-width: 640px) {
+  [role="dialog"] {
+    padding: 1rem;
+  }
+  
+  .dialog-content {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
+/* Mobile-friendly tabs */
+@media (max-width: 640px) {
+  .tabs-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+  }
+  
+  .tabs-trigger {
+    white-space: nowrap;
+  }
+}
+
+/* Responsive form layouts */
+@media (max-width: 768px) {
+  .form-row-2col {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-row-3col {
+    grid-template-columns: 1fr;
   }
 }
