@@ -131,11 +131,11 @@ const Products = () => {
                 maximumFractionDigits: 0,
                 currencyDisplay: 'symbol'
               }).format(product.price).replace('₹', '₹ '); // Add a space after the symbol
-              
+            
               const discountedPrice = product.discountPercentage > 0 
                 ? product.price * (1 - product.discountPercentage / 100) 
                 : null;
-                
+              
               const formattedDiscountedPrice = discountedPrice 
                 ? new Intl.NumberFormat("en-IN", {
                     style: "currency",
@@ -144,6 +144,8 @@ const Products = () => {
                     currencyDisplay: 'symbol'
                   }).format(discountedPrice).replace('₹', '₹ ') // Add a space after the symbol
                 : null;
+
+              const availableSizes = product.sizes_stock ? Object.keys(product.sizes_stock) : [];
 
               return (
                 <Card 
@@ -203,9 +205,9 @@ const Products = () => {
                       {product.description}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {product.size && (
+                      {availableSizes.length > 0 && (
                         <Badge variant="outline" className="bg-gray-50">
-                          Size: {product.size}
+                          Sizes: {availableSizes.join(', ')}
                         </Badge>
                       )}
                       {product.color && (
@@ -238,7 +240,6 @@ const Products = () => {
         )}
       </div>
 
-      {/* Add Product Dialog */}
       <Dialog 
         open={isAddProductDialogOpen} 
         onOpenChange={setIsAddProductDialogOpen}
@@ -254,7 +255,6 @@ const Products = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Product Dialog */}
       <Dialog 
         open={isEditProductDialogOpen} 
         onOpenChange={setIsEditProductDialogOpen}
