@@ -38,7 +38,6 @@ export const mapDatabaseProductToProduct = (item: any): Product => {
     description: item.description || '',
     color: item.color || null,
     sizes_stock: item.sizes_stock || {}, // Ensure sizes_stock is always at least an empty object
-    size: item.size || null, // Keep the size field for backward compatibility
     
     // Add required fields with default values
     quantity: item.stock || 0, // Set quantity same as stock
@@ -66,7 +65,6 @@ export function mapProductToDatabaseProduct(product: Product) {
     color: product.color,
     item_number: product.itemNumber,
     updated_at: new Date().toISOString(),
-    sizes_stock: product.sizes_stock || null,  // Map the sizes_stock to the database
-    size: product.size || null  // Add the size field back to database mapping
+    sizes_stock: product.sizes_stock || null  // Map the sizes_stock to the database
   };
 }

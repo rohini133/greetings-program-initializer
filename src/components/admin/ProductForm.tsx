@@ -1,3 +1,4 @@
+
 import { useState, useRef, ChangeEvent, useEffect } from "react";
 import { Product } from "@/types/supabase-extensions";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,6 @@ const productSchema = z.object({
   lowStockThreshold: z.coerce.number().int().positive("Threshold must be a positive integer"),
   image: z.string().url("Must be a valid URL"),
   color: z.string().optional(),
-  // Removed size
   itemNumber: z.string().min(3, "Item number must be at least 3 characters"),
   sizes_stock: z.record(z.string(), z.number().int().nonnegative()).optional(),
 });
@@ -91,9 +91,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           lowStockThreshold: product.lowStockThreshold,
           image: product.image,
           color: product.color || "",
-          // size REMOVED
           itemNumber: product.itemNumber,
-          ...(isEditing && product ? { sizes_stock: product.sizes_stock } : { sizes_stock: {} }),
+          sizes_stock: product.sizes_stock || {},
         }
       : {
           name: "",
@@ -107,7 +106,6 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           lowStockThreshold: 5,
           image: "https://placehold.co/400x300?text=Product+Image",
           color: "",
-          // size REMOVED
           itemNumber: `ITM${Math.floor(Math.random() * 10000)}`,
           sizes_stock: {}
         }
@@ -134,7 +132,6 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           ...values,
           stock: totalStock,
           sizes_stock: values.sizes_stock,
-          // size REMOVED
           updatedAt: new Date().toISOString()
         });
         
@@ -157,7 +154,6 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           lowStockThreshold: values.lowStockThreshold,
           image: values.image,
           color: values.color,
-          // size REMOVED
           itemNumber: values.itemNumber,
           quantity: values.stock,
           userId: "system",
@@ -405,8 +401,6 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             )}
           />
         </div>
-        
-        {/* Removed the single-size input field entirely */}
 
         <FormField
           control={form.control}

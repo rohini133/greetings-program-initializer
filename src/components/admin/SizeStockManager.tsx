@@ -96,4 +96,3 @@ export const SizeStockManager = ({ value, onChange }: SizeStockManagerProps) => 
     </div>
   );
 };
-

@@ -20,7 +20,6 @@ export interface Product {
   color?: string;
   itemNumber: string;
   sizes_stock?: Record<string, number>; // Optional sizes_stock field for multiple sizes/stock
-  size?: string; // Adding back the size property as optional for backward compatibility
 }
 
 export interface BillItem {
