@@ -90,13 +90,6 @@ const Dashboard = () => {
               <Package className="mr-2 h-5 w-5" />
               Manage Inventory
             </Button>
-            <Button 
-              onClick={() => navigate("/billing")} 
-              className="bg-emerald-600 hover:bg-emerald-700 h-auto py-3"
-            >
-              <DollarSign className="mr-2 h-5 w-5" />
-              Sales Dashboard
-            </Button>
           </>
         ) : (
           <>
