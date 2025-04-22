@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { AlertCircle, DollarSign, Package, ShoppingBag, TrendingUp, Settings2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -90,13 +89,6 @@ const Dashboard = () => {
             >
               <Package className="mr-2 h-5 w-5" />
               Manage Inventory
-            </Button>
-            <Button 
-              onClick={() => navigate("/products")} 
-              className="bg-indigo-600 hover:bg-indigo-700 h-auto py-3"
-            >
-              <ShoppingBag className="mr-2 h-5 w-5" />
-              Product Catalog
             </Button>
             <Button 
               onClick={() => navigate("/billing")} 
