@@ -60,6 +60,7 @@ import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { getBills } from "@/services/billService";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { getDailySalesData, getWeeklySalesData, getMonthlySalesData, getYearlySalesData } from "@/services/dashboardService";
 
 // Type definitions for product sales analysis
 interface ProductSalesSummary {
@@ -229,13 +230,27 @@ export function SalesReport() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const fetchedBills = await getBills();
-        setBills(fetchedBills);
+        const [dailyData, weeklyData, monthlyData, yearlyData] = await Promise.all([
+          getDailySalesData(),
+          getWeeklySalesData(),
+          getMonthlySalesData(),
+          getYearlySalesData()
+        ]);
         
-        setReportData(generateSalesData(fetchedBills));
+        setReportData({
+          ...reportData,
+          dailySales: dailyData.map(item => ({ day: item.label, sales: item.sales })),
+          weeklySales: weeklyData.map(item => ({ week: item.label, sales: item.sales })),
+          monthlySales: monthlyData.map(item => ({ name: item.label, sales: item.sales })),
+          yearlySales: yearlyData.map(item => ({ year: item.label, sales: item.sales }))
+        });
       } catch (error) {
         console.error("Error fetching sales data:", error);
-        setReportData(generateSampleSalesData());
+        toast({
+          title: "Error",
+          description: "Failed to fetch sales data. Please try again later.",
+          variant: "destructive"
+        });
       } finally {
         setIsLoading(false);
       }

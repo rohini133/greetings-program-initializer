@@ -1,10 +1,14 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Bill } from "@/data/models";
+import { startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMonths, 
+  startOfYear, endOfYear, startOfWeek, endOfWeek, subWeeks, subYears, format } from "date-fns";
 
-/**
- * Fetch sales dashboard stats from Supabase's `bills` table in real-time.
- * Returns { totalSales, todaySales, lowStockItems, outOfStockItems, topSellingProducts }
- */
+interface SalesDataPoint {
+  label: string;
+  sales: number;
+}
+
 export const getDashboardStats = async () => {
   // Fetch total sales
   const { data: totalSalesData, error: totalSalesError } = await supabase
@@ -79,4 +83,149 @@ export const getDashboardStats = async () => {
     outOfStockItems,
     topSellingProducts,
   };
+};
+
+export const getDailySalesData = async (): Promise<SalesDataPoint[]> => {
+  const today = new Date();
+  const thirtyDaysAgo = subDays(today, 30);
+  
+  const { data: bills, error } = await supabase
+    .from('bills')
+    .select('total, created_at')
+    .gte('created_at', thirtyDaysAgo.toISOString())
+    .lte('created_at', today.toISOString())
+    .eq('status', 'completed');
+
+  if (error) throw error;
+
+  const dailyTotals: Record<string, number> = {};
+  
+  // Initialize all days in the last 30 days with 0
+  for (let i = 0; i < 30; i++) {
+    const date = subDays(today, i);
+    const dayKey = format(date, 'MMM dd');
+    dailyTotals[dayKey] = 0;
+  }
+
+  // Aggregate sales by day
+  bills?.forEach((bill) => {
+    const day = format(new Date(bill.created_at), 'MMM dd');
+    dailyTotals[day] = (dailyTotals[day] || 0) + Number(bill.total);
+  });
+
+  // Convert to array format required by chart
+  return Object.entries(dailyTotals)
+    .map(([day, total]) => ({
+      label: day,
+      sales: total
+    }))
+    .reverse();
+};
+
+export const getWeeklySalesData = async (): Promise<SalesDataPoint[]> => {
+  const today = new Date();
+  const twelveWeeksAgo = subWeeks(today, 12);
+  
+  const { data: bills, error } = await supabase
+    .from('bills')
+    .select('total, created_at')
+    .gte('created_at', twelveWeeksAgo.toISOString())
+    .lte('created_at', today.toISOString())
+    .eq('status', 'completed');
+
+  if (error) throw error;
+
+  const weeklyTotals: Record<string, number> = {};
+  
+  // Initialize all weeks with 0
+  for (let i = 0; i < 12; i++) {
+    const weekStart = subWeeks(today, i);
+    const weekLabel = `Week ${format(weekStart, 'dd MMM')}`;
+    weeklyTotals[weekLabel] = 0;
+  }
+
+  // Aggregate sales by week
+  bills?.forEach((bill) => {
+    const billDate = new Date(bill.created_at);
+    const weekStart = startOfWeek(billDate);
+    const weekLabel = `Week ${format(weekStart, 'dd MMM')}`;
+    weeklyTotals[weekLabel] = (weeklyTotals[weekLabel] || 0) + Number(bill.total);
+  });
+
+  return Object.entries(weeklyTotals)
+    .map(([week, total]) => ({
+      label: week,
+      sales: total
+    }))
+    .reverse();
+};
+
+export const getMonthlySalesData = async (): Promise<SalesDataPoint[]> => {
+  const today = new Date();
+  const startOfLastYear = startOfYear(subYears(today, 1));
+  
+  const { data: bills, error } = await supabase
+    .from('bills')
+    .select('total, created_at')
+    .gte('created_at', startOfLastYear.toISOString())
+    .lte('created_at', today.toISOString())
+    .eq('status', 'completed');
+
+  if (error) throw error;
+
+  const monthlyTotals: Record<string, number> = {};
+  
+  // Initialize all months with 0
+  for (let i = 0; i < 12; i++) {
+    const month = format(subMonths(today, i), 'MMM');
+    monthlyTotals[month] = 0;
+  }
+
+  // Aggregate sales by month
+  bills?.forEach((bill) => {
+    const month = format(new Date(bill.created_at), 'MMM');
+    monthlyTotals[month] = (monthlyTotals[month] || 0) + Number(bill.total);
+  });
+
+  return Object.entries(monthlyTotals)
+    .map(([month, total]) => ({
+      label: month,
+      sales: total
+    }))
+    .reverse();
+};
+
+export const getYearlySalesData = async (): Promise<SalesDataPoint[]> => {
+  const today = new Date();
+  const fiveYearsAgo = subYears(today, 5);
+  
+  const { data: bills, error } = await supabase
+    .from('bills')
+    .select('total, created_at')
+    .gte('created_at', fiveYearsAgo.toISOString())
+    .lte('created_at', today.toISOString())
+    .eq('status', 'completed');
+
+  if (error) throw error;
+
+  const yearlyTotals: Record<string, number> = {};
+  
+  // Initialize last 5 years with 0
+  for (let i = 0; i < 5; i++) {
+    const year = format(subYears(today, i), 'yyyy');
+    yearlyTotals[year] = 0;
+  }
+
+  // Aggregate sales by year
+  bills?.forEach((bill) => {
+    const year = format(new Date(bill.created_at), 'yyyy');
+    yearlyTotals[year] = (yearlyTotals[year] || 0) + Number(bill.total);
+  });
+
+  return Object.entries(yearlyTotals)
+    .map(([year, total]) => ({
+      label: year,
+      sales: total
+    }))
+    .reverse();
 };
