@@ -23,7 +23,8 @@ import {
   FileText, 
   Loader2, 
   CalendarRange,
-  Filter
+  Filter,
+  AlertCircle
 } from "lucide-react";
 import { Bill, BillWithItems, BillItemWithProduct } from "@/data/models";
 import { sampleDashboardStats } from "@/data/sampleData";
@@ -62,7 +63,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { getDailySalesData, getWeeklySalesData, getMonthlySalesData, getYearlySalesData } from "@/services/dashboardService";
 
-// Type definitions for product sales analysis
 interface ProductSalesSummary {
   id: string;
   name: string;
@@ -224,21 +224,35 @@ export function SalesReport() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [bills, setBills] = useState<BillWithItems[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
+      setLoadError(null);
+      
       try {
+        console.log("Fetching sales data for SalesReport component...");
+        
         const [dailyData, weeklyData, monthlyData, yearlyData] = await Promise.all([
           getDailySalesData(),
           getWeeklySalesData(),
           getMonthlySalesData(),
           getYearlySalesData()
         ]);
+
+        console.log("Sales data fetched successfully:", {
+          dailyData: dailyData.length,
+          weeklyData: weeklyData.length,
+          monthlyData: monthlyData.length,
+          yearlyData: yearlyData.length
+        });
+        
+        const sampleData = generateSampleSalesData();
         
         setReportData({
-          ...reportData,
+          ...sampleData,
           dailySales: dailyData.map(item => ({ day: item.label, sales: item.sales })),
           weeklySales: weeklyData.map(item => ({ week: item.label, sales: item.sales })),
           monthlySales: monthlyData.map(item => ({ name: item.label, sales: item.sales })),
@@ -246,9 +260,13 @@ export function SalesReport() {
         });
       } catch (error) {
         console.error("Error fetching sales data:", error);
+        setLoadError("Failed to fetch sales data. Please try again later.");
+        
+        setReportData(generateSampleSalesData());
+        
         toast({
           title: "Error",
-          description: "Failed to fetch sales data. Please try again later.",
+          description: "Failed to fetch sales data. Using sample data instead.",
           variant: "destructive"
         });
       } finally {
@@ -257,7 +275,7 @@ export function SalesReport() {
     };
 
     fetchData();
-  }, [dateRange]);
+  }, [dateRange, toast]);
 
   const generateSalesData = (bills: BillWithItems[]): SalesReportData => {
     const filteredBills = bills.filter(bill => {
@@ -310,10 +328,8 @@ export function SalesReport() {
       ? [...productSalesDetails].sort((a, b) => b.totalProfit - a.totalProfit)[0]
       : null;
 
-    const sampleData = generateSampleSalesData();
-    
     return {
-      ...sampleData,
+      ...generateSampleSalesData(),
       productSalesDetails,
       mostSellingProduct,
       mostProfitableProduct,
@@ -400,10 +416,41 @@ export function SalesReport() {
     return Array.from(brands);
   };
 
-  if (isLoading || !reportData) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading sales data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-4" />
+          <p className="text-muted-foreground mb-4">{loadError}</p>
+          <Button onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!reportData) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-4" />
+          <p className="text-muted-foreground mb-4">No sales data available.</p>
+          <Button onClick={() => window.location.reload()}>
+            Refresh
+          </Button>
+        </div>
       </div>
     );
   }

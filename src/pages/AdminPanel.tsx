@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { SalesReport } from "@/components/admin/SalesReport";
 import { DiscountManager } from "@/components/admin/DiscountManager";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Card, 
@@ -33,23 +33,47 @@ import {
   Plus, 
   Printer,
   Settings2, 
-  ShoppingBag 
+  ShoppingBag,
+  Loader2
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { generateSalesReportPDF, generateSalesReportExcel } from "@/utils/pdfGenerator";
 import { sampleDashboardStats } from "@/data/sampleData";
 
 export function AdminPanel() {
-  const { userRole, isLoggedIn } = useAuth();
+  const { userRole, isLoggedIn, checkAuthAccess } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAddProductDialogOpen, setIsAddProductDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const [isExportingReport, setIsExportingReport] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("sales");
   
+  const canViewSalesStats = checkAuthAccess("sales_statistics");
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <PageContainer title="Admin Panel">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </PageContainer>
+    );
+  }
+
   if (!isLoggedIn || userRole !== "admin") {
-    return <Navigate to="/login" />;
+    navigate("/login");
+    return null;
   }
 
   const handleAddProductSuccess = () => {
@@ -260,7 +284,7 @@ export function AdminPanel() {
         </div>
       </div>
 
-      <Tabs defaultValue="sales" className="space-y-4">
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid sm:grid-cols-3 grid-cols-1 w-full max-w-md mb-2">
           <TabsTrigger value="products" className="flex items-center">
             <ClipboardList className="mr-2 h-4 w-4" />
@@ -305,7 +329,7 @@ export function AdminPanel() {
         </TabsContent>
         
         <TabsContent value="sales" className="space-y-4">
-          <SalesReport />
+          {canViewSalesStats && <SalesReport />}
         </TabsContent>
         
         <TabsContent value="discounts" className="space-y-4">

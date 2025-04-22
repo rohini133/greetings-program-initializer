@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
@@ -14,6 +14,7 @@ import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import { Toaster } from "@/components/ui/toaster";
 import BillHistory from './pages/BillHistory';
+import { useAuth } from './contexts/AuthContext';
 
 // ScrollToTop component that scrolls to top on route change
 const ScrollToTop = () => {
@@ -26,46 +27,36 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Update the routes to remove Products page (since it duplicates Inventory)
-// and add BillHistory page
-const routes = [
-  {
-    path: "/",
-    element: <Dashboard />,
-  },
-  {
-    path: "/inventory",
-    element: <Inventory />,
-  },
-  {
-    path: "/billing",
-    element: <Billing />,
-  },
-  {
-    path: "/billhistory",
-    element: <BillHistory />,
-  },
-  {
-    path: "/admin",
-    element: <AdminPanel />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/profile",
-    element: <Profile />,
-  },
-  {
-    path: "/settings",
-    element: <Settings />,
-  },
-  {
-    path: "/*",
-    element: <NotFound />,
-  },
-];
+// Protected route component
+const ProtectedRoute = ({ element, requiredRole }: { element: JSX.Element, requiredRole?: string }) => {
+  const { isLoggedIn, userRole } = useAuth();
+  
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (requiredRole && userRole !== requiredRole) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return element;
+};
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/inventory" element={<ProtectedRoute element={<Inventory />} />} />
+      <Route path="/billing" element={<ProtectedRoute element={<Billing />} />} />
+      <Route path="/billhistory" element={<ProtectedRoute element={<BillHistory />} />} />
+      <Route path="/admin" element={<ProtectedRoute element={<AdminPanel />} requiredRole="admin" />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
+      <Route path="/settings" element={<ProtectedRoute element={<Settings />} />} />
+      <Route path="/*" element={<NotFound />} />
+    </Routes>
+  );
+}
 
 function App() {
   return (
@@ -74,11 +65,7 @@ function App() {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow">
-          <Routes>
-            {routes.map((route, index) => (
-              <Route key={index} path={route.path} element={route.element} />
-            ))}
-          </Routes>
+          <AppRoutes />
         </main>
         <Footer />
       </div>
