@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   createdAt: string;
@@ -43,6 +44,7 @@ export interface Bill {
   createdAt: string;
   status: string;
   userId: string;
+  bill_number: number; // Added bill_number property
   
   // Add discount properties to Bill interface
   discountAmount?: number;
@@ -115,6 +117,7 @@ export function mapRawBillToBill(rawBill: any): Bill {
     createdAt: rawBill.created_at,
     status: rawBill.status,
     userId: rawBill.user_id,
+    bill_number: rawBill.bill_number,
     customerName: rawBill.customer_name,
     customerPhone: rawBill.customer_phone,
     customerEmail: rawBill.customer_email,

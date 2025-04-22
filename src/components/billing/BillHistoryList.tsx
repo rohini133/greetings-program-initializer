@@ -59,6 +59,7 @@ export const BillHistoryList = ({
     const filtered = bills.filter(
       bill => 
         bill.id.toLowerCase().includes(lowerCaseQuery) ||
+        String(bill.bill_number).includes(lowerCaseQuery) || // Add bill_number to search
         bill.customerName?.toLowerCase().includes(lowerCaseQuery) ||
         bill.customerPhone?.toLowerCase().includes(lowerCaseQuery)
     );
@@ -167,12 +168,12 @@ export const BillHistoryList = ({
                   <TableCell 
                     className="cursor-pointer"
                     onClick={() => onSelectBill(bill)}
-                  >{bill.items.length} items</TableCell>
+                  >{bill.items?.length || 0} items</TableCell>
                   <TableCell 
                     className="font-semibold text-[#ea384c] cursor-pointer"
                     onClick={() => onSelectBill(bill)}
                   >
-                    {formatCurrency(bill.total)}
+                    {formatCurrency(bill.total || 0)}
                   </TableCell>
                   <TableCell>
                     <Button 
@@ -203,7 +204,7 @@ export const BillHistoryList = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete bill #{billToDelete?.id}. This action
+              This will permanently delete bill #{billToDelete?.bill_number}. This action
               cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
