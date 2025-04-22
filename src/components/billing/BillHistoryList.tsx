@@ -102,7 +102,7 @@ export const BillHistoryList = ({
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search by bill ID, customer name or phone"
+            placeholder="Search by bill #, customer name or phone"
             className="pl-8"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -143,7 +143,9 @@ export const BillHistoryList = ({
                   <TableCell 
                     className="font-medium cursor-pointer"
                     onClick={() => onSelectBill(bill)}
-                  >{bill.id}</TableCell>
+                  >
+                    #{bill.bill_number}
+                  </TableCell>
                   <TableCell 
                     className="cursor-pointer"
                     onClick={() => onSelectBill(bill)}

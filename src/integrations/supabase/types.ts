@@ -59,6 +59,7 @@ export type Database = {
       }
       bills: {
         Row: {
+          bill_number: number
           created_at: string
           customer_email: string | null
           customer_name: string | null
@@ -72,6 +73,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          bill_number?: number
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
@@ -85,6 +87,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          bill_number?: number
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
