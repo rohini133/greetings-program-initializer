@@ -483,6 +483,7 @@ export const sampleProducts: Product[] = [
 export const sampleBills: BillWithItems[] = [
   {
     id: "B001",
+    bill_number: 1,
     items: [
       { 
         id: "bi1", 
@@ -521,6 +522,7 @@ export const sampleBills: BillWithItems[] = [
   },
   {
     id: "B002",
+    bill_number: 2,
     items: [
       { 
         id: "bi3", 
@@ -559,6 +561,7 @@ export const sampleBills: BillWithItems[] = [
   },
   {
     id: "B003",
+    bill_number: 3,
     items: [
       { 
         id: "bi5", 
