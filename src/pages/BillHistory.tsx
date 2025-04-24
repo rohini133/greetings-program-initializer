@@ -6,30 +6,19 @@ import { BillReceipt } from "@/components/billing/BillReceipt";
 import { Bill } from "@/data/models";
 import { getBills, deleteBill } from "@/services/billService";
 import { useToast } from "@/components/ui/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const BillHistory = () => {
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
-  const [bills, setBills] = useState<Bill[]>([]);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const fetchBills = async () => {
-    try {
-      const data = await getBills();
-      setBills(data);
-    } catch (error) {
-      console.error("Error loading bills:", error);
-      toast({
-        title: "Failed to load bills",
-        description: "There was an error loading the bill history.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  useEffect(() => {
-    fetchBills();
-  }, []);
+  const { data: bills = [], refetch } = useQuery({
+    queryKey: ['bills'],
+    queryFn: getBills,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 
   const handleSelectBill = (bill: Bill) => {
     setSelectedBill(bill);
@@ -41,8 +30,8 @@ const BillHistory = () => {
       // Delete from database
       await deleteBill(billId);
       
-      // Update local state
-      setBills(prevBills => prevBills.filter(bill => bill.id !== billId));
+      // Invalidate and refetch bills
+      await queryClient.invalidateQueries({ queryKey: ['bills'] });
       
       // If the deleted bill was selected, clear selection
       if (selectedBill?.id === billId) {
