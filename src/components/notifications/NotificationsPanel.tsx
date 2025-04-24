@@ -1,90 +1,119 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { CheckCheck, ShoppingCart, AlertTriangle, Package, Bell, X } from "lucide-react";
+import { CheckCheck, AlertTriangle, X, Bell } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Notification {
   id: string;
   title: string;
   message: string;
-  timestamp: string;
+  created_at: string;
   read: boolean;
   type: 'info' | 'warning' | 'success' | 'error';
 }
 
 export function NotificationsPanel() {
   const { toast } = useToast();
+  const { isLoggedIn } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   
-  // Sample notifications data - in a real app this would come from API or context
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "n1",
-      title: "Order Completed",
-      message: "Bill #B023 has been successfully processed",
-      timestamp: "10 minutes ago",
-      read: false,
-      type: "success"
-    },
-    {
-      id: "n2",
-      title: "Low Stock Alert",
-      message: "6 products are running low on stock",
-      timestamp: "2 hours ago",
-      read: false,
-      type: "warning"
-    },
-    {
-      id: "n3",
-      title: "New Product Added",
-      message: "Dairy Milk Chocolate has been added to inventory",
-      timestamp: "Yesterday",
-      read: true,
-      type: "info"
-    },
-    {
-      id: "n4",
-      title: "System Update",
-      message: "System will be updated tonight at 2 AM",
-      timestamp: "2 days ago",
-      read: true,
-      type: "info"
-    },
-    {
-      id: "n5",
-      title: "Payment Error",
-      message: "Failed to process payment for Bill #B019",
-      timestamp: "3 days ago",
-      read: true,
-      type: "error"
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    
+    // Initial fetch
+    fetchNotifications();
+
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('notifications-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications'
+        },
+        () => {
+          fetchNotifications();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isLoggedIn]);
+
+  const fetchNotifications = async () => {
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching notifications:', error);
+      return;
     }
-  ]);
+
+    setNotifications(data || []);
+  };
   
   const unreadCount = notifications.filter(n => !n.read).length;
   
-  const markAsRead = (id: string) => {
-    setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, read: true } : n
-    ));
+  const markAsRead = async (id: string) => {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ read: true })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error marking notification as read:', error);
+      return;
+    }
+
+    await fetchNotifications();
   };
   
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  const markAllAsRead = async () => {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ read: true })
+      .eq('read', false);
+
+    if (error) {
+      console.error('Error marking all notifications as read:', error);
+      return;
+    }
+
+    await fetchNotifications();
+    
     toast({
       title: "All notifications marked as read",
       description: `${unreadCount} notifications have been marked as read.`,
     });
   };
   
-  const removeNotification = (id: string) => {
-    setNotifications(notifications.filter(n => n.id !== id));
+  const removeNotification = async (id: string) => {
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error removing notification:', error);
+      return;
+    }
+
+    await fetchNotifications();
   };
   
   const getNotificationIcon = (type: string) => {
@@ -95,9 +124,28 @@ export function NotificationsPanel() {
         return <AlertTriangle className="h-5 w-5 text-amber-500" />;
       case 'error':
         return <X className="h-5 w-5 text-red-500" />;
-      case 'info':
       default:
-        return <Package className="h-5 w-5 text-blue-500" />;
+        return <Bell className="h-5 w-5 text-blue-500" />;
+    }
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (minutes < 60) {
+      return `${minutes} minutes ago`;
+    } else if (hours < 24) {
+      return `${hours} hours ago`;
+    } else if (days === 1) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString();
     }
   };
 
@@ -150,7 +198,7 @@ export function NotificationsPanel() {
                           {notification.message}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          {notification.timestamp}
+                          {formatTimestamp(notification.created_at)}
                         </div>
                       </div>
                       <div className="flex items-start gap-1">

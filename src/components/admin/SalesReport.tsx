@@ -690,7 +690,9 @@ export function SalesReport() {
                           <TableCell className="text-right">{formatCurrency(product.sellingPrice)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(product.totalRevenue)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(product.totalProfit)}</TableCell>
-                          <TableCell>{new Date(product.lastSoldAt).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            {new Date(product.lastSoldAt).toLocaleDateString()}
+                          </TableCell>
                         </TableRow>
                       ))}
                       {getFilteredProductSales().length === 0 && (
