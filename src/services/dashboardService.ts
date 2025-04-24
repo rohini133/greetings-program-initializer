@@ -342,7 +342,7 @@ export const getSalesData = async (dateRange: { from: Date, to: Date }) => {
       brand: string;
       buyingPrice: number;
       sellingPrice: number;
-      lastSoldAt: string; // Added lastSoldAt field
+      lastSoldAt: string; // Ensure this is a string
     }> = {};
 
     bills?.forEach(bill => {
@@ -369,7 +369,7 @@ export const getSalesData = async (dateRange: { from: Date, to: Date }) => {
             brand: product.brand || 'Unknown',
             buyingPrice,
             sellingPrice,
-            lastSoldAt: bill.created_at // Initialize with first sale date
+            lastSoldAt: bill.created_at // Store as string
           };
         }
         
@@ -421,7 +421,7 @@ export const getSalesData = async (dateRange: { from: Date, to: Date }) => {
         soldCount: d.soldCount,
       }));
 
-    // Convert product sales to array and include lastSoldAt
+    // Convert product sales to array and include lastSoldAt as string
     const productSalesDetails = Object.entries(productSales).map(([id, data]) => ({
       id,
       name: data.name,
@@ -432,7 +432,7 @@ export const getSalesData = async (dateRange: { from: Date, to: Date }) => {
       sellingPrice: data.sellingPrice,
       totalRevenue: data.revenue,
       totalProfit: data.profit,
-      lastSoldAt: data.lastSoldAt // Include lastSoldAt in the return data
+      lastSoldAt: data.lastSoldAt // Keep as string
     }));
 
     const mostSellingProduct = productSalesDetails.length > 0 

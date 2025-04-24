@@ -73,7 +73,7 @@ interface ProductSalesSummary {
   sellingPrice: number;
   totalRevenue: number;
   totalProfit: number;
-  lastSoldAt: Date;
+  lastSoldAt: string;
 }
 
 interface SalesReportData {
@@ -151,7 +151,7 @@ const generateSampleSalesData = () => {
       sellingPrice: 20000,
       totalRevenue: 840000,
       totalProfit: (20000 - 15000) * 42,
-      lastSoldAt: new Date()
+      lastSoldAt: new Date().toISOString()
     },
     {
       id: "2",
@@ -163,7 +163,7 @@ const generateSampleSalesData = () => {
       sellingPrice: 65000,
       totalRevenue: 975000,
       totalProfit: (65000 - 45000) * 15,
-      lastSoldAt: new Date()
+      lastSoldAt: new Date().toISOString()
     },
     {
       id: "3",
@@ -175,7 +175,7 @@ const generateSampleSalesData = () => {
       sellingPrice: 599,
       totalRevenue: 46722,
       totalProfit: (599 - 200) * 78,
-      lastSoldAt: new Date()
+      lastSoldAt: new Date().toISOString()
     },
     {
       id: "4",
@@ -187,7 +187,7 @@ const generateSampleSalesData = () => {
       sellingPrice: 450,
       totalRevenue: 54000,
       totalProfit: (450 - 250) * 120,
-      lastSoldAt: new Date()
+      lastSoldAt: new Date().toISOString()
     }
   ];
 

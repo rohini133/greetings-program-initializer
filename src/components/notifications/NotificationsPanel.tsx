@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -64,7 +65,27 @@ export function NotificationsPanel() {
       return;
     }
 
-    setNotifications(data || []);
+    // Cast the notification type to ensure it matches our expected types
+    const typedNotifications = data?.map(notification => ({
+      ...notification,
+      type: mapNotificationType(notification.type)
+    })) || [];
+    
+    setNotifications(typedNotifications);
+  };
+  
+  // Helper function to map any string type to our allowed notification types
+  const mapNotificationType = (type: string): 'info' | 'warning' | 'success' | 'error' => {
+    switch (type.toLowerCase()) {
+      case 'warning':
+        return 'warning';
+      case 'success':
+        return 'success';
+      case 'error':
+        return 'error';
+      default:
+        return 'info';
+    }
   };
   
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -240,3 +261,4 @@ export function NotificationsPanel() {
     </Popover>
   );
 }
+
