@@ -4,6 +4,7 @@ import { Product } from "@/types/supabase-extensions";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Image } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 
 interface ProductSearchItemProps {
   product: Product;
@@ -47,7 +48,7 @@ export const ProductSearchItem = ({ product, onAddToCart }: ProductSearchItemPro
             {product.brand} • {product.category}
           </div>
           <div className="text-sm font-medium mt-1">
-            ${product.price.toFixed(2)}
+            {formatCurrency(product.price)}
           </div>
         </div>
       </div>
@@ -80,4 +81,3 @@ export const ProductSearchItem = ({ product, onAddToCart }: ProductSearchItemPro
     </div>
   );
 };
-
