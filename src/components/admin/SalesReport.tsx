@@ -61,7 +61,7 @@ import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { getBills } from "@/services/billService";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { getDailySalesData, getWeeklySalesData, getMonthlySalesData, getYearlySalesData } from "@/services/dashboardService";
+import { getDailySalesData, getWeeklySalesData, getMonthlySalesData, getYearlySalesData, getSalesData } from "@/services/dashboardService";
 
 interface ProductSalesSummary {
   id: string;
@@ -235,38 +235,34 @@ export function SalesReport() {
       try {
         console.log("Fetching sales data for SalesReport component...");
         
-        const [dailyData, weeklyData, monthlyData, yearlyData] = await Promise.all([
+        const [dailyData, weeklyData, monthlyData, yearlyData, salesData] = await Promise.all([
           getDailySalesData(),
           getWeeklySalesData(),
           getMonthlySalesData(),
-          getYearlySalesData()
+          getYearlySalesData(),
+          getSalesData(dateRange)
         ]);
 
-        console.log("Sales data fetched successfully:", {
-          dailyData: dailyData.length,
-          weeklyData: weeklyData.length,
-          monthlyData: monthlyData.length,
-          yearlyData: yearlyData.length
-        });
-        
-        const sampleData = generateSampleSalesData();
+        console.log("Sales data fetched successfully");
         
         setReportData({
-          ...sampleData,
           dailySales: dailyData.map(item => ({ day: item.label, sales: item.sales })),
           weeklySales: weeklyData.map(item => ({ week: item.label, sales: item.sales })),
           monthlySales: monthlyData.map(item => ({ name: item.label, sales: item.sales })),
-          yearlySales: yearlyData.map(item => ({ year: item.label, sales: item.sales }))
+          yearlySales: yearlyData.map(item => ({ year: item.label, sales: item.sales })),
+          categoryDistribution: salesData.categoryDistribution,
+          topProducts: salesData.topProducts,
+          recentTransactions: salesData.recentTransactions,
+          productSalesDetails: salesData.productSalesDetails,
+          mostSellingProduct: salesData.mostSellingProduct,
+          mostProfitableProduct: salesData.mostProfitableProduct
         });
       } catch (error) {
         console.error("Error fetching sales data:", error);
         setLoadError("Failed to fetch sales data. Please try again later.");
-        
-        setReportData(generateSampleSalesData());
-        
         toast({
           title: "Error",
-          description: "Failed to fetch sales data. Using sample data instead.",
+          description: "Failed to fetch sales data. Please try again.",
           variant: "destructive"
         });
       } finally {

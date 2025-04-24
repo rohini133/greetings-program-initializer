@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Bill } from "@/data/models";
 import { startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMonths, 
@@ -299,6 +298,147 @@ export const getYearlySalesData = async (): Promise<SalesDataPoint[]> => {
     return result;
   } catch (error) {
     console.error("Error in getYearlySalesData:", error);
+    throw error;
+  }
+};
+
+export const getSalesData = async (dateRange: { from: Date, to: Date }) => {
+  console.log("Fetching sales data for date range:", dateRange);
+  
+  try {
+    // Fetch bills and related items for the date range
+    const { data: bills, error: billsError } = await supabase
+      .from('bills')
+      .select(`
+        *,
+        items:bill_items(
+          quantity,
+          product_id,
+          product_name,
+          product_price,
+          products(
+            id,
+            name,
+            category,
+            brand,
+            buying_price
+          )
+        )
+      `)
+      .gte('created_at', dateRange.from.toISOString())
+      .lte('created_at', dateRange.to.toISOString())
+      .eq('status', 'completed');
+
+    if (billsError) throw billsError;
+
+    // Process sales by category
+    const categorySales: Record<string, number> = {};
+    const productSales: Record<string, { 
+      quantity: number;
+      revenue: number;
+      profit: number;
+      name: string;
+      category: string;
+      brand: string;
+      buyingPrice: number;
+      sellingPrice: number;
+    }> = {};
+
+    bills?.forEach(bill => {
+      bill.items?.forEach((item: any) => {
+        if (!item.products) return;
+        
+        const product = item.products;
+        const category = product.category || 'Uncategorized';
+        const quantity = item.quantity || 0;
+        const sellingPrice = item.product_price || 0;
+        const buyingPrice = product.buying_price || 0;
+        
+        // Update category sales
+        categorySales[category] = (categorySales[category] || 0) + (quantity * sellingPrice);
+        
+        // Update product sales
+        if (!productSales[product.id]) {
+          productSales[product.id] = {
+            quantity: 0,
+            revenue: 0,
+            profit: 0,
+            name: product.name,
+            category: category,
+            brand: product.brand || 'Unknown',
+            buyingPrice,
+            sellingPrice
+          };
+        }
+        
+        productSales[product.id].quantity += quantity;
+        productSales[product.id].revenue += quantity * sellingPrice;
+        productSales[product.id].profit += quantity * (sellingPrice - buyingPrice);
+      });
+    });
+
+    // Convert category sales to percentage distribution
+    const totalSales = Object.values(categorySales).reduce((sum, val) => sum + val, 0);
+    const categoryDistribution = Object.entries(categorySales).map(([name, value]) => ({
+      name,
+      value: Math.round((value / totalSales) * 100)
+    }));
+
+    // Convert product sales to array and sort by quantity
+    const productSalesArray = Object.entries(productSales).map(([id, data]) => ({
+      id,
+      ...data
+    }));
+
+    const topProducts = productSalesArray
+      .sort((a, b) => b.quantity - a.quantity)
+      .map(product => ({
+        product: {
+          id: product.id,
+          name: product.name,
+          category: product.category,
+          brand: product.brand
+        },
+        soldCount: product.quantity
+      }))
+      .slice(0, 5);
+
+    const productSalesDetails = productSalesArray.map(product => ({
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      brand: product.brand,
+      totalQuantity: product.quantity,
+      buyingPrice: product.buyingPrice,
+      sellingPrice: product.sellingPrice,
+      totalRevenue: product.revenue,
+      totalProfit: product.profit
+    }));
+
+    const mostSellingProduct = productSalesDetails.length > 0 
+      ? [...productSalesDetails].sort((a, b) => b.totalQuantity - a.totalQuantity)[0]
+      : null;
+
+    const mostProfitableProduct = productSalesDetails.length > 0
+      ? [...productSalesDetails].sort((a, b) => b.totalProfit - a.totalProfit)[0]
+      : null;
+
+    console.log("Processed sales data:", {
+      categories: categoryDistribution.length,
+      products: productSalesDetails.length,
+      topProducts: topProducts.length
+    });
+
+    return {
+      categoryDistribution,
+      topProducts,
+      productSalesDetails,
+      mostSellingProduct,
+      mostProfitableProduct,
+      recentTransactions: bills || []
+    };
+  } catch (error) {
+    console.error("Error fetching sales data:", error);
     throw error;
   }
 };
