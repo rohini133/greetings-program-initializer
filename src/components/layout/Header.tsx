@@ -1,4 +1,3 @@
-
 import { Bell, LogOut, MenuIcon, ShoppingCart, User, Settings } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -26,7 +25,7 @@ export const Header = () => {
     
     // Cashiers can only access dashboard and billing
     if (userRole === "cashier") {
-      return item === "dashboard" || item === "billing" || item === "billhistory";
+      return item === "dashboard" || item === "billing";
     }
     
     return true;
@@ -85,7 +84,7 @@ export const Header = () => {
                     Inventory
                   </Link>
                 )}
-                {shouldShowNavItem("billhistory") && (
+                {userRole === "admin" && (
                   <Link
                     to="/billhistory"
                     className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
@@ -211,7 +210,7 @@ export const Header = () => {
                   Inventory
                 </Link>
               )}
-              {shouldShowNavItem("billhistory") && (
+              {userRole === "admin" && (
                 <Link
                   to="/billhistory"
                   className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${

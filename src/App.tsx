@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -46,9 +45,9 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Dashboard />} />
-      <Route path="/inventory" element={<ProtectedRoute element={<Inventory />} />} />
+      <Route path="/inventory" element={<ProtectedRoute element={<Inventory />} requiredRole="admin" />} />
       <Route path="/billing" element={<ProtectedRoute element={<Billing />} />} />
-      <Route path="/billhistory" element={<ProtectedRoute element={<BillHistory />} />} />
+      <Route path="/billhistory" element={<ProtectedRoute element={<BillHistory />} requiredRole="admin" />} />
       <Route path="/admin" element={<ProtectedRoute element={<AdminPanel />} requiredRole="admin" />} />
       <Route path="/login" element={<Login />} />
       <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
