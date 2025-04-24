@@ -73,6 +73,7 @@ interface ProductSalesSummary {
   sellingPrice: number;
   totalRevenue: number;
   totalProfit: number;
+  lastSoldAt: Date;
 }
 
 interface SalesReportData {
@@ -149,7 +150,8 @@ const generateSampleSalesData = () => {
       buyingPrice: 15000,
       sellingPrice: 20000,
       totalRevenue: 840000,
-      totalProfit: (20000 - 15000) * 42
+      totalProfit: (20000 - 15000) * 42,
+      lastSoldAt: new Date()
     },
     {
       id: "2",
@@ -160,7 +162,8 @@ const generateSampleSalesData = () => {
       buyingPrice: 45000,
       sellingPrice: 65000,
       totalRevenue: 975000,
-      totalProfit: (65000 - 45000) * 15
+      totalProfit: (65000 - 45000) * 15,
+      lastSoldAt: new Date()
     },
     {
       id: "3",
@@ -171,7 +174,8 @@ const generateSampleSalesData = () => {
       buyingPrice: 200,
       sellingPrice: 599,
       totalRevenue: 46722,
-      totalProfit: (599 - 200) * 78
+      totalProfit: (599 - 200) * 78,
+      lastSoldAt: new Date()
     },
     {
       id: "4",
@@ -182,7 +186,8 @@ const generateSampleSalesData = () => {
       buyingPrice: 250,
       sellingPrice: 450,
       totalRevenue: 54000,
-      totalProfit: (450 - 250) * 120
+      totalProfit: (450 - 250) * 120,
+      lastSoldAt: new Date()
     }
   ];
 
@@ -307,7 +312,8 @@ export function SalesReport() {
               buyingPrice,
               sellingPrice,
               totalRevenue: sellingPrice * quantity,
-              totalProfit: (sellingPrice - buyingPrice) * quantity
+              totalProfit: (sellingPrice - buyingPrice) * quantity,
+              lastSoldAt: bill.createdAt
             });
           }
         });
@@ -670,6 +676,7 @@ export function SalesReport() {
                         <TableHead className="text-right">Selling Price</TableHead>
                         <TableHead className="text-right">Revenue</TableHead>
                         <TableHead className="text-right">Profit</TableHead>
+                        <TableHead>Last Sold</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -683,11 +690,12 @@ export function SalesReport() {
                           <TableCell className="text-right">{formatCurrency(product.sellingPrice)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(product.totalRevenue)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(product.totalProfit)}</TableCell>
+                          <TableCell>{new Date(product.lastSoldAt).toLocaleDateString()}</TableCell>
                         </TableRow>
                       ))}
                       {getFilteredProductSales().length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={8} className="text-center py-4">No products found matching your filters</TableCell>
+                          <TableCell colSpan={9} className="text-center py-4">No products found matching your filters</TableCell>
                         </TableRow>
                       )}
                     </TableBody>

@@ -342,6 +342,7 @@ export const getSalesData = async (dateRange: { from: Date, to: Date }) => {
       brand: string;
       buyingPrice: number;
       sellingPrice: number;
+      lastSoldAt: string; // Added lastSoldAt field
     }> = {};
 
     bills?.forEach(bill => {
@@ -367,13 +368,18 @@ export const getSalesData = async (dateRange: { from: Date, to: Date }) => {
             category: category,
             brand: product.brand || 'Unknown',
             buyingPrice,
-            sellingPrice
+            sellingPrice,
+            lastSoldAt: bill.created_at // Initialize with first sale date
           };
         }
         
         productSales[product.id].quantity += quantity;
         productSales[product.id].revenue += quantity * sellingPrice;
         productSales[product.id].profit += quantity * (sellingPrice - buyingPrice);
+        // Update lastSoldAt if this sale is more recent
+        if (new Date(bill.created_at) > new Date(productSales[product.id].lastSoldAt)) {
+          productSales[product.id].lastSoldAt = bill.created_at;
+        }
       });
     });
 
@@ -384,35 +390,49 @@ export const getSalesData = async (dateRange: { from: Date, to: Date }) => {
       value: Math.round((value / totalSales) * 100)
     }));
 
-    // Convert product sales to array and sort by quantity
-    const productSalesArray = Object.entries(productSales).map(([id, data]) => ({
-      id,
-      ...data
-    }));
+    // Compute counts by product
+    const { data: billItems, error: billItemsError } = await supabase
+      .from("bill_items")
+      .select("product_id, product_name, quantity");
 
-    const topProducts = productSalesArray
-      .sort((a, b) => b.quantity - a.quantity)
-      .map(product => ({
+    if (billItemsError) {
+      console.error("Error fetching bill items:", billItemsError);
+      throw billItemsError;
+    }
+
+    // Compute counts by product
+    const productSalesCounts: Record<string, { name: string; soldCount: number }> = {};
+    (billItems || []).forEach((item: any) => {
+      if (!item.product_id) return;
+      if (!productSalesCounts[item.product_id]) {
+        productSalesCounts[item.product_id] = { name: item.product_name, soldCount: 0 };
+      }
+      productSalesCounts[item.product_id].soldCount += item.quantity || 0;
+    });
+    const topProducts = Object.entries(productSalesCounts)
+      .sort((a, b) => b[1].soldCount - a[1].soldCount)
+      .slice(0, 5)
+      .map(([id, d]) => ({
         product: {
-          id: product.id,
-          name: product.name,
-          category: product.category,
-          brand: product.brand
+          id,
+          name: d.name,
+          // Optionally fetch more info like image/brand if needed
         },
-        soldCount: product.quantity
-      }))
-      .slice(0, 5);
+        soldCount: d.soldCount,
+      }));
 
-    const productSalesDetails = productSalesArray.map(product => ({
-      id: product.id,
-      name: product.name,
-      category: product.category,
-      brand: product.brand,
-      totalQuantity: product.quantity,
-      buyingPrice: product.buyingPrice,
-      sellingPrice: product.sellingPrice,
-      totalRevenue: product.revenue,
-      totalProfit: product.profit
+    // Convert product sales to array and include lastSoldAt
+    const productSalesDetails = Object.entries(productSales).map(([id, data]) => ({
+      id,
+      name: data.name,
+      category: data.category,
+      brand: data.brand,
+      totalQuantity: data.quantity,
+      buyingPrice: data.buyingPrice,
+      sellingPrice: data.sellingPrice,
+      totalRevenue: data.revenue,
+      totalProfit: data.profit,
+      lastSoldAt: data.lastSoldAt // Include lastSoldAt in the return data
     }));
 
     const mostSellingProduct = productSalesDetails.length > 0 
