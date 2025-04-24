@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -99,14 +98,6 @@ const Login = () => {
                 </div>
               </div>
               
-              <div className="mt-6">
-                <div className="p-3 bg-white/10 rounded-lg">
-                  <p className="text-sm text-white/90">
-                    "Vivaas has transformed how we manage our store inventory and sales. Highly recommended!"
-                  </p>
-                  <p className="text-xs text-white/70 mt-2">- Sarah Johnson, Fashion Boutique Owner</p>
-                </div>
-              </div>
             </div>
             
             <div className="login-form md:col-span-3 p-8">
